@@ -1,17 +1,16 @@
 # Payment smart contract
 
-The contract is used while buying BCERTs for fiat transactions. It validates Payment Token
+The contract is used while buying BCERTs for fiat transactions. It validates PaymentID
 
 ## Fields
 
 | Field | Type | Key words | Description |
 |---|---|---|---|
 | `owner` | `address` | `public` | Owner of the contract |
-| `balance` | `uint` | `public` | Current balance of the account |
-| `_usedTokens` | `mapping(string => bool)` | `private` | Tokens, that were used previously |
-| `_version` | `uint` | `private` | Counter of emitted events |
-| `_transfer` | `mapping(string => Transfer)` | `private` | Stores information of all successful transfers |
+| `_transfers` | `mapping(string => Transfer)` | `private` | Stores information of all successful transfers |
+| `_paymentIDs` | `mapping(string => bool)` | `private` | Payment IDs, that were used previously |
 | `_admins` | `mapping(address => bool)` | `private` | Stores admins, who can transfer money from account |
+| `_version` | `uint` | `private` | Counter of emitted events |
 
 ## Modifiers
 
@@ -25,30 +24,32 @@ The contract is used while buying BCERTs for fiat transactions. It validates Pay
 | Code | Value |
 |---|---|
 | `_contractCreatedCode` | `30001` |
-| `_tokenValidatedCode` | `30002` |
+| `_invalidPaymentIDCode` | `30002` |
 | `_transferSuccessCode` | `30003` |
 | `_balanceReplenishedCode` | `30004` |
-| `_adminAdded` | `30005` |
-| `_adminRemoved` | `30006` |
+| `_adminAddedCode` | `30005` |
+| `_adminRemovedCode` | `30006` |
+| `_insufficientFundsCode` | `30007` |
 
 ## Events
 
 | Event | Accepted values | Description |
 |---|---|---|
 | `ContractCreated` | `uint code` - event code, `uint version` - version | Emits when contract created |
-| `TokenValidated` | `uint code` - event code, `uint version` - version, `string token` - validated token, `bool isValid` - is token valid | Emits when token validated |
-| `TransferSuccess` | `uint code` - event code, `uint version` - version, `string token` - validated token, `address to` - address for transfering, `uint amount` - amount of BCERTs to transfer | Emits when transfer was successful |
-| `BalanceReplenished` | `uint code` - event code, `uint version` - version, `uint oldBalance` - old value of balance, `uint amount` - transferred amount, `uint newBalance` - new value of balance | Emits when balance was replenished |
+| `InvalidPaymentID` | `uint code` - event code, `uint version` - version, `string paymentID` - validated paymentID | Emits when given invalid paymentID for transfer |
+| `TransferSuccess` | `uint code` - event code, `uint version` - version, `string paymentID` - validated paymentID, `address to` - address for transfering, `uint amount` - amount of BCERTs to transfer | Emits when transfer was successful |
+| `BalanceReplenished` | `uint code` - event code, `uint version` - version, `uint amount` - transferred amount, `uint balance` - new value of balance | Emits when balance was replenished |
 | `AdminAdded` | `uint code` - event code, `uint version` - version, `address newAdmin` - new admin | Emits when new admin added |
 | `AdminRemoved` | `uint code` - event code, `uint version` - version, `address oldAdmin` - old admin | Emits when admin removed |
+| `InsufficientFunds` | `uint code` - event code, `uint version` - version, `uint amount` - given amount of BCERTs, `uint balance` - current contract balance | Emits when BCERT amount for transfer is more than contract balance |
 
 ## Methods
 
 | Method | Returned value | Argument | Key words | Description |
 |---|---|---|---|---|
-| `validate` | `bool` | `string token` - token for validation | `external` | Validates token (check if was used before) |
+| `constructor` | -//- | `public` | Creates contract and adds owner to admins |
 | -//- | -//- | -//- | `external payable` | Fallback function to replenish contract balance |
-| `transfer` | -//- | `string token` - validated token, `address payable to` - address for transfering, `uint amount` - amount of BCERTs to transfer | `external` | Transfers BCERTs to account |
-| `transfer` | -//- | `string token` - validated token, `address payable to` - address for transfering, `uint amount` - amount of BCERTs to transfer, `string extension` - additional data | `public` | Transfers BCERTs to account, fills extension field |
+| `transfer` | -//- | `string paymentID` - validated payment ID, `address payable to` - address for transfering, `uint amount` - amount of BCERTs to transfer | `external` | Transfers BCERTs to account |
+| `transfer` | -//- | `string paymentID` - validated paymentID, `address payable to` - address for transfering, `uint amount` - amount of BCERTs to transfer, `string extension` - additional data | `public` | Transfers BCERTs to account, fills extension field |
 | `addAdmin` | -//- | `address newAdmin` - new admin | `public` | Adds admin to contract. Admin can transfer money from account |
 | `removeAdmin` | -//- | `address oldAdmin` - old admin | `public` | Removes admin from contract |
